@@ -3,6 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Enums\Role;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -22,6 +23,8 @@ class User extends Authenticatable // implements MustVerifyEmail
         'name',
         'email',
         'password',
+        'role',
+        'color',
     ];
 
     /**
@@ -44,6 +47,7 @@ class User extends Authenticatable // implements MustVerifyEmail
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'role' => Role::class,
         ];
     }
 
@@ -56,5 +60,18 @@ class User extends Authenticatable // implements MustVerifyEmail
             ->explode(' ')
             ->map(fn (string $name) => Str::of($name)->substr(0, 1))
             ->implode('');
+    }
+
+    // Yalnız eltern üye ekleyebilir, düzenleyebilir, silebilir.
+    public function isEltern(): bool
+    {
+        return $this->role === Role::Eltern;
+    }
+
+    // Gast her şeyi görebilir ama hiçbir şey değiştiremez.
+    // Sonraki modüllerin policy'leri de yazma izni için bunu kullanır.
+    public function canWrite(): bool
+    {
+        return $this->role !== Role::Gast;
     }
 }

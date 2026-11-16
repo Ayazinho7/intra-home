@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\Role;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Auth;
@@ -14,6 +15,15 @@ new #[Layout('components.layouts.auth')] class extends Component {
     public string $password = '';
     public string $password_confirmation = '';
 
+    // Açık kayıt yalnız evin İLK kişisi içindir (o kişi eltern olur).
+    // Sonraki üyeleri eltern "Mitglieder" sayfasından ekler.
+    public function mount(): void
+    {
+        if (User::exists()) {
+            $this->redirect(route('login'), navigate: true);
+        }
+    }
+
     /**
      * Handle an incoming registration request.
      */
@@ -25,7 +35,11 @@ new #[Layout('components.layouts.auth')] class extends Component {
             'password' => ['required', 'string', 'confirmed', Rules\Password::defaults()],
         ]);
 
+        // Bu arada başka biri kaydolduysa dur.
+        abort_if(User::exists(), 403);
+
         $validated['password'] = Hash::make($validated['password']);
+        $validated['role'] = Role::Eltern;
 
         event(new Registered(($user = User::create($validated))));
 
@@ -36,7 +50,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
 }; ?>
 
 <div class="flex flex-col gap-6">
-    <x-auth-header title="Create an account" description="Enter your details below to create your account" />
+    <x-auth-header :title="__('Create an account')" :description="__('Enter your details below to create your account')" />
 
     <!-- Session Status -->
     <x-auth-session-status class="text-center" :status="session('status')" />
@@ -44,7 +58,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
     <form wire:submit="register" class="flex flex-col gap-6">
         <!-- Name -->
         <div class="grid gap-2">
-            <flux:input wire:model="name" id="name" label="{{ __('Name') }}" type="text" name="name" required autofocus autocomplete="name" placeholder="Full name" />
+            <flux:input wire:model="name" id="name" label="{{ __('Name') }}" type="text" name="name" required autofocus autocomplete="name" :placeholder="__('Full name')" />
         </div>
 
         <!-- Email Address -->
@@ -62,7 +76,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
                 name="password"
                 required
                 autocomplete="new-password"
-                placeholder="Password"
+                :placeholder="__('Password')"
             />
         </div>
 
@@ -76,7 +90,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
                 name="password_confirmation"
                 required
                 autocomplete="new-password"
-                placeholder="Confirm password"
+                :placeholder="__('Confirm password')"
             />
         </div>
 
@@ -88,7 +102,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
     </form>
 
     <div class="space-x-1 text-center text-sm text-zinc-600 dark:text-zinc-400">
-        Already have an account?
-        <x-text-link href="{{ route('login') }}">Log in</x-text-link>
+        {{ __('Already have an account?') }}
+        <x-text-link href="{{ route('login') }}">{{ __('Log in') }}</x-text-link>
     </div>
 </div>

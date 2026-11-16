@@ -1,17 +1,21 @@
 <?php
 
+use App\Http\Controllers\MemberController;
 use Illuminate\Support\Facades\Route;
 use Livewire\Volt\Volt;
 
-Route::get('/', function () {
-    return view('welcome');
-})->name('home');
+// Giriş yapmayan hiçbir sayfayı göremez: ana adres panele gider,
+// 'auth' middleware'i giriş yapmamış kişiyi /login'e yollar.
+Route::redirect('/', 'dashboard')->name('home');
 
 Route::view('dashboard', 'dashboard')
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
 
 Route::middleware(['auth'])->group(function () {
+    // Ev üyeleri. Kim ne yapabilir: app/Policies/UserPolicy.php
+    Route::resource('members', MemberController::class)->except('show');
+
     Route::redirect('settings', 'settings/profile');
 
     Volt::route('settings/profile', 'settings.profile')->name('settings.profile');
