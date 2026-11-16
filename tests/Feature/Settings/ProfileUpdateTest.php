@@ -54,36 +54,25 @@ class ProfileUpdateTest extends TestCase
         $this->assertNotNull($user->refresh()->email_verified_at);
     }
 
-    public function test_user_can_delete_their_account(): void
+    // Üyeleri eltern yönetir: kimse (eltern dahil) kendi hesabını silemez.
+    public function test_user_cannot_delete_their_own_account(): void
     {
-        $user = User::factory()->create();
+        foreach ([User::factory()->eltern()->create(), User::factory()->create(), User::factory()->gast()->create()] as $user) {
+            $this->actingAs($user);
 
-        $this->actingAs($user);
+            Volt::test('settings.delete-user-form')
+                ->set('password', 'password')
+                ->call('deleteUser')
+                ->assertForbidden();
 
-        $response = Volt::test('settings.delete-user-form')
-            ->set('password', 'password')
-            ->call('deleteUser');
-
-        $response
-            ->assertHasNoErrors()
-            ->assertRedirect('/');
-
-        $this->assertNull($user->fresh());
-        $this->assertFalse(auth()->check());
+            $this->assertNotNull($user->fresh());
+        }
     }
 
-    public function test_correct_password_must_be_provided_to_delete_account(): void
+    public function test_delete_account_form_is_hidden(): void
     {
-        $user = User::factory()->create();
+        $this->actingAs(User::factory()->eltern()->create());
 
-        $this->actingAs($user);
-
-        $response = Volt::test('settings.delete-user-form')
-            ->set('password', 'wrong-password')
-            ->call('deleteUser');
-
-        $response->assertHasErrors(['password']);
-
-        $this->assertNotNull($user->fresh());
+        $this->get('/settings/profile')->assertOk()->assertDontSee(__('Delete Account'));
     }
 }

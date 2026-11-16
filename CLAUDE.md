@@ -24,6 +24,8 @@ Laravel (güncel) · Blade + Tailwind · SQLite (geliştirme) · Pest · Vite
 - Para kuruş (cent) cinsinden tamsayı: `amount_cents`. Ondalık/float yok.
 - Her modül: migration → model → FormRequest → resource controller → policy → Blade → test.
 - Başkasının kaydını düzenleme yetkisi policy ile kontrol edilir.
+- Roller: `App\Enums\Role` (eltern/kind/gast). Gast salt okur: her policy'nin create/update/delete'i `$user->canWrite()` ister. Üye yönetimi yalnız eltern (`UserPolicy`).
+- Açık kayıt yalnız ilk kullanıcı için (o eltern olur); sonrakileri eltern /members'tan ekler.
 - Bir modül = bir git branch'i (`modul/shopping-list`). Bitince `kod-inceleyici` ajanı, sonra merge.
 
 ## Claude için
@@ -32,5 +34,5 @@ Laravel (güncel) · Blade + Tailwind · SQLite (geliştirme) · Pest · Vite
 - Cevaplar kısa olsun.
 
 ## Durum
-Bitmiş modüller: (yok)
-Sıradaki: Ev üyeleri ve giriş
+Bitmiş modüller: Ev üyeleri ve giriş (dal `modul/members`, inceleme bekliyor)
+Sıradaki: Einkaufsliste
