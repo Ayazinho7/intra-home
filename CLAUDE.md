@@ -34,6 +34,6 @@ Laravel (güncel) · Blade + Tailwind · SQLite (geliştirme) · Pest · Vite
 - Cevaplar kısa olsun.
 
 ## Durum
-Bitmiş modüller: Ev üyeleri ve giriş
+Bitmiş modüller: Ev üyeleri ve giriş, Einkaufsliste
 Açık iş: lang/de.json içinde laravel-lang metinleri hâlâ Sie-Form; du-Form yapılacak.
-Sıradaki: Einkaufsliste
+Sıradaki: Putzplan
