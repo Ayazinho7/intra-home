@@ -15,6 +15,7 @@
                 <flux:navlist.group :heading="__('Household')" class="grid">
                     <flux:navlist.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>{{ __('Overview') }}</flux:navlist.item>
                     <flux:navlist.item icon="users" :href="route('members.index')" :current="request()->routeIs('members.*')" wire:navigate>{{ __('Members') }}</flux:navlist.item>
+                    <flux:navlist.item icon="shopping-cart" :href="route('shopping-items.index')" :current="request()->routeIs('shopping-items.*')" wire:navigate>{{ __('Shopping list') }}</flux:navlist.item>
                 </flux:navlist.group>
             </flux:navlist>
 

@@ -17,17 +17,17 @@ class UserPolicy
     // Yeni üyeyi yalnız eltern ekler.
     public function create(User $user): bool
     {
-        return $user->isEltern();
+        return $user->canWrite() && $user->isEltern();
     }
 
     public function update(User $user, User $member): bool
     {
-        return $user->isEltern();
+        return $user->canWrite() && $user->isEltern();
     }
 
     // Eltern kendini silemez: evde hiç eltern kalmazdı.
     public function delete(User $user, User $member): bool
     {
-        return $user->isEltern() && $user->isNot($member);
+        return $user->canWrite() && $user->isEltern() && $user->isNot($member);
     }
 }

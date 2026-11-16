@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\MemberController;
+use App\Http\Controllers\ShoppingItemController;
 use Illuminate\Support\Facades\Route;
 use Livewire\Volt\Volt;
 
@@ -15,6 +16,9 @@ Route::view('dashboard', 'dashboard')
 Route::middleware(['auth'])->group(function () {
     // Ev üyeleri. Kim ne yapabilir: app/Policies/UserPolicy.php
     Route::resource('members', MemberController::class)->except('show');
+
+    Route::patch('shopping-items/{shopping_item}/buy', [ShoppingItemController::class, 'buy'])->name('shopping-items.buy');
+    Route::resource('shopping-items', ShoppingItemController::class)->except('show');
 
     Route::redirect('settings', 'settings/profile');
 
