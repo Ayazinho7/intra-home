@@ -1,0 +1,15 @@
+{
+  "model": "sonnet",
+  "permissions": {
+    "deny": [
+      "Read(./vendor/**)",
+      "Read(./node_modules/**)",
+      "Read(./storage/logs/**)",
+      "Read(./storage/framework/**)",
+      "Read(./public/build/**)",
+      "Read(./composer.lock)",
+      "Read(./package-lock.json)",
+      "Read(./.env)"
+    ]
+  }
+}
