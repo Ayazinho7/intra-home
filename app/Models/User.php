@@ -23,7 +23,7 @@ class User extends Authenticatable // implements MustVerifyEmail
         'name',
         'email',
         'password',
-        'role',
+        // role bilerek yok: mass assignment ile kimse kendini eltern yapamasın.
         'color',
     ];
 

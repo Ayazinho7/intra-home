@@ -123,6 +123,24 @@ test('eltern kendi rolünü düşüremez', function () {
     expect($eltern->refresh()->role)->toBe(Role::Eltern);
 });
 
+test('kendi kaydında rol seçeneği yalnız eltern', function () {
+    $eltern = User::factory()->eltern()->create();
+
+    $this->actingAs($eltern)->get("/members/{$eltern->id}/edit")
+        ->assertOk()
+        ->assertSee('value="eltern"', false)
+        ->assertDontSee('value="kind"', false)
+        ->assertDontSee('value="gast"', false);
+});
+
+test('rol formdan toplu atamayla değiştirilemez', function () {
+    $kind = User::factory()->create();
+
+    $kind->update(['role' => 'eltern']);
+
+    expect($kind->refresh()->role)->toBe(Role::Kind);
+});
+
 test('kind başkasını düzenleyemez', function () {
     $kind = User::factory()->create();
     $other = User::factory()->create();
@@ -163,4 +181,20 @@ test('biri kayıtlıysa kayıt kapalıdır', function () {
 
     // Giriş sayfasında "Registrieren" bağlantısı da görünmez.
     $this->get('/login')->assertDontSee('Registrieren');
+});
+
+test('form açıkken başkası kaydolursa ikinci kayıt reddedilir', function () {
+    // Form boş veritabanında açıldı...
+    $form = Volt::test('auth.register')
+        ->set('name', 'Zweite Person')
+        ->set('email', 'zweite@example.com')
+        ->set('password', 'password')
+        ->set('password_confirmation', 'password');
+
+    // ...bu arada biri kaydoldu.
+    User::factory()->eltern()->create();
+
+    $form->call('register')->assertForbidden();
+
+    expect(User::count())->toBe(1);
 });

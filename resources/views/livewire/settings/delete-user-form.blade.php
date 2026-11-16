@@ -2,6 +2,7 @@
 
 use App\Livewire\Actions\Logout;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Volt\Component;
 
 new class extends Component {
@@ -12,6 +13,9 @@ new class extends Component {
      */
     public function deleteUser(Logout $logout): void
     {
+        // Üyeleri eltern yönetir; kimse kendi hesabını buradan silemez (UserPolicy::delete).
+        Gate::authorize('delete', Auth::user());
+
         $this->validate([
             'password' => ['required', 'string', 'current_password'],
         ]);

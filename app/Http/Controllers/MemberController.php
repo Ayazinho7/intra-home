@@ -33,8 +33,13 @@ class MemberController extends Controller
     // Yetki ve doğrulama StoreMemberRequest içinde; buraya yalnız geçerli veri gelir.
     public function store(StoreMemberRequest $request): RedirectResponse
     {
+        $data = $request->validated();
+
+        // role $fillable'da değil (biri kendini eltern yapamasın); açıkça atanır.
         // Şifreyi User modelindeki 'hashed' cast'i şifreler.
-        User::create($request->validated());
+        $member = new User($data);
+        $member->role = $data['role'];
+        $member->save();
 
         return redirect()->route('members.index')->with('status', __('Member added.'));
     }
@@ -43,7 +48,10 @@ class MemberController extends Controller
     {
         Gate::authorize('update', $member);
 
-        return view('members.edit', ['member' => $member, 'roles' => Role::cases()]);
+        // Eltern kendi rolünü düşüremez; formda da yalnız "Eltern" görünsün.
+        $roles = $member->is(auth()->user()) ? [Role::Eltern] : Role::cases();
+
+        return view('members.edit', ['member' => $member, 'roles' => $roles]);
     }
 
     public function update(UpdateMemberRequest $request, User $member): RedirectResponse
@@ -55,7 +63,9 @@ class MemberController extends Controller
             unset($data['password']);
         }
 
-        $member->update($data);
+        $member->fill($data);
+        $member->role = $data['role'];
+        $member->save();
 
         return redirect()->route('members.index')->with('status', __('Member saved.'));
     }

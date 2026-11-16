@@ -112,6 +112,8 @@ new class extends Component {
             </div>
         </form>
 
-        <livewire:settings.delete-user-form />
+        @can('delete', auth()->user())
+            <livewire:settings.delete-user-form />
+        @endcan
     </x-settings.layout>
 </section>

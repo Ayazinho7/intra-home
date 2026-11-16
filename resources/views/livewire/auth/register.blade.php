@@ -4,6 +4,7 @@ use App\Enums\Role;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 use Livewire\Attributes\Layout;
@@ -35,13 +36,20 @@ new #[Layout('components.layouts.auth')] class extends Component {
             'password' => ['required', 'string', 'confirmed', Rules\Password::defaults()],
         ]);
 
-        // Bu arada başka biri kaydolduysa dur.
-        abort_if(User::exists(), 403);
+        // Kilit: aynı anda iki kayıt gelirse ikisi de eltern olmasın.
+        $user = Cache::lock('first-registration', 10)->block(5, function () use ($validated) {
+            // Bu arada başka biri kaydolduysa dur.
+            abort_if(User::exists(), 403);
 
-        $validated['password'] = Hash::make($validated['password']);
-        $validated['role'] = Role::Eltern;
+            $user = new User($validated);
+            $user->password = Hash::make($validated['password']);
+            $user->role = Role::Eltern; // role $fillable'da değil, açıkça atanır
+            $user->save();
 
-        event(new Registered(($user = User::create($validated))));
+            return $user;
+        });
+
+        event(new Registered($user));
 
         Auth::login($user);
 
